@@ -260,6 +260,12 @@ p, h1, h2, h3, h4 { margin-top: 0; }
   height: 84px;
   font-size: 1.8rem;
 }
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
 
 .pill {
   background: var(--primary-soft);

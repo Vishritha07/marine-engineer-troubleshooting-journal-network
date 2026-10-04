@@ -104,6 +104,16 @@ function renderAlert(type, message) {
   return `<div class="alert ${type}">${escapeHtml(message)}</div>`;
 }
 
+function renderAvatar(profile, size = '') {
+  const name = profile.name || 'Marine Engineer';
+  const sizeClass = size ? ` ${size}` : '';
+  const content = profile.profilePhoto
+    ? `<img src="${escapeHtml(profile.profilePhoto)}" alt="" />`
+    : escapeHtml(name.charAt(0).toUpperCase());
+
+  return `<div class="avatar${sizeClass}" role="img" aria-label="${escapeHtml(`${name} profile photo`)}">${content}</div>`;
+}
+
 function attachRouteButtons() {
   document.querySelectorAll('[data-route]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -121,7 +131,7 @@ function renderAppShell(content) {
       <header class="topbar">
         <div class="brand-block">
           <p class="eyebrow">Marine Engineering Community</p>
-          <h1>Marine Engineer Troubleshooting Journal</h1>
+          <h1>ShipFix</h1>
         </div>
 
         <div class="topbar-right">
@@ -130,7 +140,6 @@ function renderAppShell(content) {
               <button class="nav-button ${state.route === '/dashboard' ? 'active' : ''}" data-route="/dashboard" type="button">Dashboard</button>
               <button class="nav-button ${state.route === '/discover' ? 'active' : ''}" data-route="/discover" type="button">Discover</button>
               <button class="nav-button ${state.route === '/my-profile' ? 'active' : ''}" data-route="/my-profile" type="button">My Profile</button>
-              <button class="primary-button small" data-route="/new" type="button">+ Add Trouble</button>
             </nav>
             <div class="user-chip">${escapeHtml(state.user.name || state.user.email)}</div>
             <button id="logout-button" class="secondary-button small" type="button">Logout</button>
@@ -168,7 +177,7 @@ function renderAuth(mode = 'login') {
     <div class="auth-shell">
       <div class="auth-panel">
         <div class="auth-header">
-          <p class="eyebrow">Marine engineering network</p>
+          <p class="eyebrow">ShipFix</p>
           <h2>${isLogin ? 'Welcome back' : 'Create your profile'}</h2>
         </div>
 
@@ -444,7 +453,7 @@ function renderDiscover() {
             ${state.discoverUsers.map((user) => `
               <article class="profile-card">
                 <div class="profile-card-header">
-                  <div class="avatar">${escapeHtml((user.name || 'M').charAt(0).toUpperCase())}</div>
+                  ${renderAvatar(user)}
                   <div>
                     <h3>${escapeHtml(user.name)}</h3>
                     <p class="metadata">${escapeHtml(user.role || 'Marine Engineer')}</p>
@@ -494,7 +503,7 @@ function renderMyProfile() {
   renderAppShell(`
     <main class="page-card">
       <div class="profile-header">
-        <div class="avatar large">${escapeHtml((profile.name || 'M').charAt(0).toUpperCase())}</div>
+        ${renderAvatar(profile, 'large')}
         <div class="profile-copy">
           <p class="eyebrow">Engineer profile</p>
           <h2>${escapeHtml(profile.name)}</h2>
@@ -507,89 +516,10 @@ function renderMyProfile() {
         </div>
         <div class="profile-actions">
           <button class="secondary-button" data-route="/edit-profile" type="button">Edit profile</button>
-          <button class="primary-button" data-route="/new" type="button">+ Add record</button>
         </div>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-label">Cases</span>
-          <strong>${profile.stats?.totalTroubleshootingCases || 0}</strong>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Likes</span>
-          <strong>${profile.stats?.totalLikes || 0}</strong>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Comments</span>
-          <strong>${profile.stats?.totalComments || 0}</strong>
-        </div>
-      </div>
-
-      <div class="content-panel">
-        <div class="panel-header">
-          <h3>Your troubleshooting posts</h3>
-        </div>
-
-        ${profile.records?.length === 0 ? `
-          <div class="empty-state">
-            <p>No records yet.</p>
-          </div>
-        ` : `
-          <div class="record-list">
-            ${profile.records.map((record) => `
-              <article class="record-card">
-                <div class="record-topline">
-                  <div>
-                    <p class="metadata">${formatDate(record.date)}</p>
-                    <h4>${escapeHtml(record.equipmentAffected || '—')} — ${escapeHtml(record.problem || '—')}</h4>
-                    <p class="metadata">${escapeHtml(record.title)}</p>
-                  </div>
-                  <span class="pill">Occurred: ${record.issueOccurrenceCount || 0} times</span>
-                </div>
-                <p class="record-description">${escapeHtml(record.description)}</p>
-                <div class="record-actions">
-                  <button class="secondary-button small" type="button" data-action="view-details" data-id="${record.id}">View details</button>
-                  <button class="secondary-button small" type="button" data-action="edit-record" data-id="${record.id}">Edit</button>
-                  <button class="danger-button small" type="button" data-action="delete-record" data-id="${record.id}">Delete</button>
-                </div>
-              </article>
-            `).join('')}
-          </div>
-        `}
       </div>
     </main>
   `);
-
-  document.querySelectorAll('[data-action="view-details"]').forEach((button) => {
-    button.addEventListener('click', () => {
-      navigateToRoute(`/details/${button.dataset.id}`);
-      renderApp();
-    });
-  });
-
-  document.querySelectorAll('[data-action="edit-record"]').forEach((button) => {
-    button.addEventListener('click', () => {
-      navigateToRoute(`/edit/${button.dataset.id}`);
-      renderApp();
-    });
-  });
-
-  document.querySelectorAll('[data-action="delete-record"]').forEach((button) => {
-    button.addEventListener('click', async () => {
-      const confirmed = window.confirm('Delete this troubleshooting record?');
-      if (!confirmed) return;
-
-      try {
-        await apiFetch(`/api/troubleshooting/${button.dataset.id}`, { method: 'DELETE' });
-        state.success = 'Troubleshooting record deleted successfully.';
-        await loadMyProfile();
-      } catch (error) {
-        state.error = error.message;
-        renderMyProfile();
-      }
-    });
-  });
 
   attachRouteButtons();
 }
@@ -616,7 +546,7 @@ function renderProfile() {
   renderAppShell(`
     <main class="page-card">
       <div class="profile-header">
-        <div class="avatar large">${escapeHtml((profile.name || 'M').charAt(0).toUpperCase())}</div>
+        ${renderAvatar(profile, 'large')}
         <div class="profile-copy">
           <p class="eyebrow">Engineer profile</p>
           <h2>${escapeHtml(profile.name)}</h2>
@@ -646,7 +576,7 @@ function renderProfile() {
 
       <div class="content-panel">
         <div class="panel-header">
-          <h3>${profile.isOwner ? 'Your troubleshooting posts' : `${escapeHtml(profile.name.split(' ')[0])}'s troubleshooting posts`}</h3>
+          <h3>${escapeHtml(profile.name)}'s troubleshooting posts</h3>
         </div>
 
         ${(profile.records || []).length === 0 ? `
@@ -661,8 +591,9 @@ function renderProfile() {
                   <div>
                     <p class="metadata">${formatDate(record.date)}</p>
                     <h4>${escapeHtml(record.title)}</h4>
+                    <p class="metadata">${escapeHtml(record.equipmentAffected || '—')} — ${escapeHtml(record.problem || '—')}</p>
                   </div>
-                  <span class="pill">${record.issueOccurrenceCount} occurrences</span>
+                  <span class="pill">${record.issueOccurrenceCount || 0} occurrences</span>
                 </div>
                 <p class="record-description">${escapeHtml(record.description)}</p>
                 <div class="record-actions">

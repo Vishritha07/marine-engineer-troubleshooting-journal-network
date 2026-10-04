@@ -260,7 +260,7 @@ app.get(['/', '/login', '/register', '/dashboard', '/my-profile', '/profile/:id'
 async function startServer() {
   await ensureSeedData();
 
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Marine Engineer Troubleshooting Journal running on http://localhost:${PORT}`);
   });
 }

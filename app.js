@@ -62,7 +62,7 @@ function renderLogin() {
   createLayout(`
     <div class="login-shell">
       <div class="login-panel">
-        <h2>Marine Engineer Troubleshooting Journal</h2>
+        <h2>ShipFix</h2>
         <p class="muted-text">Sign in to manage equipment troubleshooting records.</p>
         ${state.error ? `<div class="alert error">${escapeHtml(state.error)}</div>` : ''}
         <form id="login-form" class="login-form">
@@ -124,7 +124,7 @@ function renderDashboard() {
   createLayout(`
     <div class="app-shell">
       <header class="topbar">
-        <h1>Marine Engineer Troubleshooting Journal</h1>
+        <h1>ShipFix</h1>
         <div class="topbar-right">
           <div class="user-chip">${escapeHtml(state.user?.name || state.user?.email || '')}</div>
           <button id="logout-button" class="secondary-button" type="button">Logout</button>
@@ -224,7 +224,7 @@ function renderForm(record = null, mode = 'create') {
   createLayout(`
     <div class="app-shell">
       <header class="topbar">
-        <h1>Marine Engineer Troubleshooting Journal</h1>
+        <h1>ShipFix</h1>
         <div class="topbar-right">
           <div class="user-chip">${escapeHtml(state.user?.name || state.user?.email || '')}</div>
           <button id="back-dashboard" class="secondary-button" type="button">Back to Dashboard</button>
@@ -339,7 +339,7 @@ function renderDetails(record) {
   createLayout(`
     <div class="app-shell">
       <header class="topbar">
-        <h1>Marine Engineer Troubleshooting Journal</h1>
+        <h1>ShipFix</h1>
         <div class="topbar-right">
           <div class="user-chip">${escapeHtml(state.user?.name || state.user?.email || '')}</div>
           <button id="back-dashboard" class="secondary-button" type="button">Back to Dashboard</button>
